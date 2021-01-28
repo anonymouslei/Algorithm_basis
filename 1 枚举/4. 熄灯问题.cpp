@@ -1,37 +1,42 @@
-#include <memory>
+/*
+我觉得这道题的解题思路是不对的。老师的思路只能验证只有最后一行的灯都熄灭了。。。
+*/
+#include <iostream>
 #include <string>
 #include <cstring>
-#include <iostream>
+#include <memory>
 
 using namespace std;
 
-int GetBit(char c, int i)
+void setBit(char& c, int i, int v)
 {
-	// 取c的第i位
-	return (c >> i) & i;
-}
-
-void SetBit(char & c, int i, int v)
-{
-	if(v)
+	if (v)
+	{
 		c |= (1 << i);
-	else
-		c &= ~(1 << i)
+	} else 
+	{
+		c &= ~(1 << i);
+	}
 }
 
-void Flip(char & c, int i)
+int getBit(char c, int i)
+{
+	return (c >> i) & 1;
+}
+
+void flip(char& c, int i)
 {
 	c ^= (1 << i);
 }
 
-void OutputResult(int t, char result[])
+void outputResult(int t, char result[])
 {
-	cout << "PUZZLE #" << t << endl;
-	for (int i = 0; i < 5; ++i)
+	cout << "PUZZLE #" << t + 1 << endl;
+	for(int i = 0; i < 5; ++i)
 	{
-		for (int j = 0; j < 6; ++j)
+		for(int j = 0; j < 6; ++j)
 		{
-			cout << GetBit(result[i], j);
+			cout << getBit(result[i], j);
 			if(j < 5)
 				cout << " ";
 		}
@@ -39,51 +44,70 @@ void OutputResult(int t, char result[])
 	}
 }
 
+
 int main()
 {
-	char oriLights[5]; //最初灯矩阵，一个比特表示一盏灯
-	char lights[5]; //不停变化的灯矩阵
-	char result[5]; //结果开关矩阵
-	char switchs; //某一行的开关状态
-	int T;
-	cin >> T;
-	for (int t = 1; t <= T; ++t)
+	char result[5], origLight[5], light[5];
+	int num;
+	cin >> num;
+	for(int i = 0; i < num; i++)
 	{
-		memset(oriLights, 0, sizeof(oriLights));
-		for(int j = 0; j < 6; j++)
-		{
-			int s;
-			cin >> s;
-			SetBit(oriLights[i], j, s);
-		}
-	}
-	for (int n = 0; n < 64; ++n) // 遍历首行开关的64种状态
-	{
-		memcpy(lights, oriLights, sizeof(oriLights));
-		switchs = n; // 第i行的开关状态
+		memset(origLight, 0, sizeof origLight);
 		for (int i = 0; i < 5; ++i)
 		{
-			result[i] = switchs; // 将第i行的开关方案存入结果
-			for (int j = 0; j < 6; ++j)
+			for( int j = 0; j < 6; j++)
 			{
-				if(GetBit(switchs, j))
-				{
-					if (j > 0)
-						Flip(lights[i], j - 1); //改左灯
-					Flip(lights[i], j); //改开关位置的灯
-					if (j < 5)
-						Flip(lights[i], j + 1); //改右灯
-				}
+				int s;
+				cin >> s;
+				setBit(origLight[i], j, s);
 			}
-			if (i < 4)
-				lights[i+1] ^= switchs; //改下一行的灯
-			switchs = lights[i]; // 第i+1行开关方案和第i行灯情况相同
 		}
-		if (lights[4] == 0)
+
+		char switchs;
+		for(int k = 0; k < 64; ++k)
 		{
-			OutputResult(t, result);
-			break;
+			memcpy(light, origLight, sizeof origLight);
+			switchs = k;
+
+			for(int i = 0; i < 5; i++)
+			{
+				result[i] = switchs;
+				// 修改当前行的灯
+				for(int j = 0; j < 6; j++)
+				{	
+					if(getBit(switchs, j))
+					{
+						// 修改该灯
+						flip(light[i], j);
+	
+						// 修改左边的灯
+						if(j > 0)
+							flip(light[i], j-1);
+	
+						// 修改右边的灯
+						if(j < 5)
+							flip(light[i], j+1);
+					}
+				}
+	
+				if (i < 4)
+				// 修改下一行的灯
+					light[i+1] ^= switchs;
+	
+				// 定义下一行switch
+				switchs = light[i];
+			}
+			// 判断最后一行是不是都熄灭了，如果是，break
+			if(light[4] == 0 && light[0] == 0)
+			{
+				cout << "find the best answer! \n";
+				break;
+			}
 		}
+
+		outputResult(i, result);	
+		outputResult(i, light);	
 	}
+
 	return 0;
 }
