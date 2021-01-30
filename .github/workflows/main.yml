@@ -1,12 +1,7 @@
 name: Super-Linter
 
 # Controls when the action will run. 
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on:push
 
 jobs:
   # Set the job key. The key is displayed as the job name
